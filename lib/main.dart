@@ -4,6 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'custom_snackbar.dart';
+import 'face_detection_model.dart';
+import 'face_detection_utility.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,57 +38,36 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-  File? imageFile;
   String _imagePath = '';
-
+  FaceDetectionModel? faceDetectionModel;
 
   void _selectImageSource(ImageSource imageSource) async {
-
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(
         source: imageSource,
-        preferredCameraDevice: CameraDevice.front,
         maxHeight: 480,
         maxWidth: 640);
     if (image == null) return;
-
-    // try {
-    imageFile = File(image.path);
-    setState(() {
-      _imagePath = imageFile!.path;
-    });
-
-    // faceDetectionModel = await FacialDetection.detectFace(imageFile);
-    //
-    //   //one face being detected
-    //   if (faceDetectionModel?.numberOfFaces == 1) {
-    //     if (faceDetectionModel?.hasPassedMinimumFaceDetection == true) {
-    //       await context.read<AuthProvider>().handleImageUpload(image, context);
-    //       setState(() {
-    //         _imagePath = image.path;
-    //       });
-    //       fieldController.text = 'filled';
-    //     } else {
-    //       errorSnackBar(
-    //           context: context, text: faceDetectionModel?.description);
-    //     }
-    //   }
-    //
-    //   //no face being detected
-    //   else if (faceDetectionModel?.numberOfFaces == 0) {
-    //     errorSnackBar(context: context, text: faceDetectionModel?.description);
-    //   }
-    //
-    //   //more than one face detected
-    //   else if (faceDetectionModel!.numberOfFaces! > 1) {
-    //     errorSnackBar(context: context, text: faceDetectionModel?.description);
-    //   }
-    // } catch (e) {
-    //   fieldController.text = '';
-    //   errorSnackBar(context: context, text: 'Error uploading image');
-    // }
-
+    try {
+      File imageFile = File(image.path);
+      faceDetectionModel = await FacialDetection.detectFace(imageFile);
+      if (faceDetectionModel?.numberOfFaces == 1) {
+        if (faceDetectionModel?.hasPassedMinimumFaceDetection == true) {
+          setState(() {
+            _imagePath = image.path;
+          });
+        } else {
+          errorSnackBar(
+              context: context, text: faceDetectionModel?.description);
+        }
+      } else if (faceDetectionModel?.numberOfFaces == 0) {
+        errorSnackBar(context: context, text: faceDetectionModel?.description);
+      } else if (faceDetectionModel!.numberOfFaces! > 1) {
+        errorSnackBar(context: context, text: faceDetectionModel?.description);
+      }
+    } catch (e) {
+      errorSnackBar(context: context, text: 'Error uploading image');
+    }
   }
 
   void _showImageSourceActionSheet(BuildContext context) async {
@@ -155,72 +137,72 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: _imagePath.isEmpty
-              ? GestureDetector(
-                  onTap: () {
-                    _showImageSourceActionSheet(context);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: SizedBox(
-                      height: 250,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            height: 250,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.8),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: const [
-                              Icon(
-                                Icons.camera_alt,
-                                color: Colors.white,
-                                size: 30,
-                              ),
-                              Text(
-                                'Click to change',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              : GestureDetector(
-                  onTap: () {
-                    _showImageSourceActionSheet(context);
-                  },
+          ? GestureDetector(
+              onTap: () {
+                _showImageSourceActionSheet(context);
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  height: 250,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
-                          // borderRadius: BorderRadius.circular(4),
-                          image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: FileImage(
-                              File(_imagePath),
-                            ),
-                          ),
-                        ),
                         height: 250,
                         width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                          Text(
+                            'Click to change',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          )
+                        ],
+                      )
                     ],
                   ),
                 ),
+              ),
+            )
+          : GestureDetector(
+              onTap: () {
+                _showImageSourceActionSheet(context);
+              },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade100,
+                      // borderRadius: BorderRadius.circular(4),
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: FileImage(
+                          File(_imagePath),
+                        ),
+                      ),
+                    ),
+                    height: 250,
+                    width: double.infinity,
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }

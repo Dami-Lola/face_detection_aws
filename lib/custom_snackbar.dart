@@ -17,14 +17,6 @@ SnackBar snackBar(
   );
 }
 
-successSnackBar({required context, String? text}) {
-  return ScaffoldMessenger.of(context).showSnackBar(
-    snackBar(
-      text ?? 'Please fill out all fields',
-    ),
-  );
-}
-
 errorSnackBar({required context, String? text}) {
   return ScaffoldMessenger.of(context).showSnackBar(
     snackBar(

@@ -17,9 +17,7 @@ class FacialDetection {
 
   static Future<FaceDetectionModel?> detectFace(File file) async {
     var faceDetectionModel = FaceDetectionModel();
-    // FaceDetectionModel? faceDetectionModel;
 
-    //convert image file to Uint8List in order to use the image in bytes
     Uint8List uint8ListImage = await file.readAsBytes();
     final service = Rekognition(
         region: _awsRegion,
@@ -57,13 +55,11 @@ class FacialDetection {
       return faceDetectionModel;
     }
 
-    //more than one face detected
     else if (faceResult.faceDetails!.length > 1) {
       faceDetectionModel.description =
       '${faceResult.faceDetails!.length} faces found';
       faceDetectionModel.numberOfFaces = faceResult.faceDetails?.length;
       return faceDetectionModel;
     }
-    // return faceDetectionModel;
   }
 }
